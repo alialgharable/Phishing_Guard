@@ -19,6 +19,7 @@ const layerLabels: Record<string, string> = {
   content: "Content analysis",
   brand: "Brand analysis",
   ml: "Machine learning",
+  sandbox: "Dynamic sandbox analysis",
 };
 type HistoryItem = Pick<ScanResponse, "url" | "requestId"> & {
   state: RiskState;
@@ -33,9 +34,24 @@ export default function Home() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   useEffect(() => {
     try {
-      setHistory(
-        JSON.parse(localStorage.getItem("phishguard-history") ?? "[]"),
+      const stored: unknown = JSON.parse(
+        localStorage.getItem("phishguard-history") ?? "[]",
       );
+      const valid = Array.isArray(stored)
+        ? stored.filter(
+            (item): item is HistoryItem =>
+              typeof item === "object" &&
+              item !== null &&
+              typeof item.url === "string" &&
+              typeof item.requestId === "string" &&
+              typeof item.at === "string" &&
+              typeof item.state === "string" &&
+              item.state in stateLabels,
+          )
+        : [];
+      // Hydrate browser-only storage after the initial server render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setHistory(valid);
     } catch {
       setHistory([]);
     }
@@ -54,17 +70,19 @@ export default function Home() {
       const response = await scanUrl(url.trim());
       setResult(response);
       setStatus("idle");
-      const next = [
-        {
-          url: response.url,
-          requestId: response.requestId,
-          state: response.riskAssessment.state,
-          at: new Date().toISOString(),
-        },
-        ...history.filter((item) => item.url !== response.url),
-      ].slice(0, 8);
-      setHistory(next);
-      localStorage.setItem("phishguard-history", JSON.stringify(next));
+      setHistory((current) => {
+        const next = [
+          {
+            url: response.url,
+            requestId: response.requestId,
+            state: response.riskAssessment.state,
+            at: new Date().toISOString(),
+          },
+          ...current.filter((item) => item.url !== response.url),
+        ].slice(0, 8);
+        localStorage.setItem("phishguard-history", JSON.stringify(next));
+        return next;
+      });
     } catch (scanError) {
       setStatus("error");
       setError(
@@ -126,7 +144,12 @@ export default function Home() {
           <span>{error}</span>
         </div>
       )}
-      {result && <ResultPanel assessment={result.riskAssessment} />}
+      {result && (
+        <ResultPanel
+          assessment={result.riskAssessment}
+          resourceType={result.resourceType}
+        />
+      )}
       {!result && status === "idle" && (
         <section className="empty-state">
           <span className="empty-index">02</span>
@@ -161,10 +184,13 @@ export default function Home() {
                 key={item.requestId}
                 onClick={() => setUrl(item.url)}
               >
-                <span>{item.url}</span>
-                <b className={`state-chip state-${item.state.toLowerCase()}`}>
-                  {stateLabels[item.state]}
-                </b>
+                <span className="history-url">{item.url}</span>
+                <span className="history-meta">
+                  <time dateTime={item.at}>{new Date(item.at).toLocaleString()}</time>
+                  <b className={`state-chip state-${item.state.toLowerCase()}`}>
+                    {stateLabels[item.state]}
+                  </b>
+                </span>
               </button>
             ))}
           </div>
@@ -178,7 +204,13 @@ export default function Home() {
   );
 }
 
-function ResultPanel({ assessment }: { assessment: RiskAssessment }) {
+function ResultPanel({
+  assessment,
+  resourceType,
+}: {
+  assessment: RiskAssessment;
+  resourceType: ScanResponse["resourceType"];
+}) {
   const unavailable = Object.entries(assessment.availability)
     .filter(([, available]) => !available)
     .map(([layer]) => layerLabels[layer] ?? layer);
@@ -196,16 +228,16 @@ function ResultPanel({ assessment }: { assessment: RiskAssessment }) {
           <p className="summary">{assessment.summary}</p>
         </div>
         <div className="result-meta">
-          <span>{assessment.evidence.length} observations</span>
-          <span>
-            {assessment.independentCategoryCount} independent categories
-          </span>
+          <span>{assessment.evidence.length} security observations</span>
+          <span>{assessment.independentCategoryCount} independent categories</span>
+          <span>{resourceType.replaceAll("_", " ").toLowerCase()}</span>
         </div>
       </div>
       <div className="result-grid">
         <div className="column">
           <EvidenceSection assessment={assessment} />
           <ThreatSection assessment={assessment} />
+          <ConfigurationSection assessment={assessment} />
         </div>
         <aside className="column side-column">
           <div className="panel">
@@ -237,7 +269,10 @@ function ResultPanel({ assessment }: { assessment: RiskAssessment }) {
               </p>
             ) : (
               <ul className="uncertainty-list">
-                {assessment.uncertainty.map((item) => (
+                {[...new Set([
+                  ...assessment.uncertainty,
+                  ...unavailable.map((layer) => `${layer} is unavailable.`),
+                ])].map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -284,27 +319,47 @@ function EvidenceSection({ assessment }: { assessment: RiskAssessment }) {
   );
 }
 function ThreatSection({ assessment }: { assessment: RiskAssessment }) {
+  const statuses = assessment.threatIntelligenceStatuses ?? [];
+  const queried = statuses.filter((item) => ["MATCH", "NO_MATCH"].includes(item.state));
+  const available = queried.length > 0;
   return (
     <div className="panel">
       <div className="panel-heading">
         <p className="eyebrow">DIRECT THREAT INTELLIGENCE</p>
-        <span>{assessment.directThreatEvidence.length}</span>
+        <span>{available ? `${assessment.directThreatEvidence.length} matches` : "Not available"}</span>
       </div>
-      {assessment.directThreatEvidence.length === 0 ? (
-        <p className="muted">
-          No authoritative listing was returned. This is not proof of safety.
-        </p>
+      {!available ? (
+        <div className="status-copy">
+          <h3>Threat intelligence unavailable</h3>
+          <p className="muted">No configured threat-intelligence provider could be queried. This is not evidence that the URL is safe.</p>
+        </div>
+      ) : assessment.directThreatEvidence.length === 0 ? (
+        <div className="status-copy">
+          <h3>Threat intelligence checked</h3>
+          <p className="muted">0 authoritative matches found across {queried.length} queried provider{queried.length === 1 ? "" : "s"}. This is not proof that the URL is safe.</p>
+        </div>
       ) : (
         assessment.directThreatEvidence.map((threat) => (
-          <article
-            className="threat-item"
-            key={`${threat.provider}-${threat.category}`}
-          >
-            <strong>{threat.category}</strong>
-            <span>{threat.provider}</span>
+          <article className="threat-item" key={`${threat.provider}-${threat.category}`}>
+            <strong>{threat.category}</strong><span>{threat.provider}</span>
           </article>
         ))
       )}
+      <div className="provider-list">
+        {statuses.map((item) => <span key={item.provider}><b>{item.provider}</b> — {item.state.replace("_", " ").toLowerCase()}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function ConfigurationSection({ assessment }: { assessment: RiskAssessment }) {
+  if (assessment.systemWarnings.length === 0) return null;
+  return (
+    <div className="panel">
+      <div className="panel-heading"><p className="eyebrow">CONFIGURATION</p><span>{assessment.systemWarnings.length} warnings</span></div>
+      <ul className="uncertainty-list">
+        {assessment.systemWarnings.map((warning) => <li key={warning}>{warning}</li>)}
+      </ul>
     </div>
   );
 }

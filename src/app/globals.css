@@ -410,6 +410,14 @@ small {
     color: var(--muted);
 }
 
+.status-copy { padding-top: 18px; }
+.status-copy h3 { font-size: 18px; font-weight: 500; margin-bottom: 7px; }
+.provider-list { display: grid; gap: 7px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 15px; color: var(--muted); font: 11px Arial, sans-serif; }
+.provider-list b { color: var(--ink); }
+.history-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; margin-left: 18px; }
+.history-meta time { color: var(--muted); font-size: 10px; }
+
 .history {
     padding: 86px 0 60px;
 }
@@ -503,6 +511,10 @@ footer {
     .result-meta {
         align-items: start;
     }
+
+    .history-item, .history-meta { align-items: flex-start; }
+    .history-item { flex-direction: column; gap: 10px; }
+    .history-meta { margin-left: 0; }
 
     footer {
         flex-direction: column;
