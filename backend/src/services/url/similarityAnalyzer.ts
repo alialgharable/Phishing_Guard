@@ -198,10 +198,32 @@ export function detectHomoglyphs(input: string): HomoglyphResult {
     z: ["ƶ", "ｚ"],
   };
 
+  // A host containing a colon is an IPv6 literal and an all-numeric host is an IPv4
+  // form. Neither is a domain name whose letters could have been substituted.
+  if (/[:/]/.test(target) || /^[0-9.]+$/.test(target)) {
+    return {
+      detected: false,
+      original: input,
+      normalized: target,
+      suspiciousCharacters: [],
+    };
+  }
+
   const suspiciousCharacters: string[] = [];
-  for (const char of Array.from(target)) {
-    for (const [ascii, alternatives] of Object.entries(homoglyphMap)) {
-      if (alternatives.includes(char)) {
+  // "0" and "1" are listed as look-alikes of letters, so they only mean anything
+  // inside a label that is otherwise alphabetic. Without this, every host containing
+  // an IP address or a numeric label is reported as a possible homoglyph attack.
+  const digitSubstitutes = new Set(["0", "1"]);
+  for (const label of target.split(".")) {
+    const labelHasLetter = /[a-z]/.test(label);
+    for (const char of Array.from(label)) {
+      for (const [ascii, alternatives] of Object.entries(homoglyphMap)) {
+        if (!alternatives.includes(char)) {
+          continue;
+        }
+        if (digitSubstitutes.has(char) && !labelHasLetter) {
+          continue;
+        }
         suspiciousCharacters.push(char);
         break;
       }

@@ -1,6 +1,12 @@
 export interface NormalizedURL {
   original: string;
+  /**
+   * Canonical serialization, present only when the URL parser accepted the input.
+   * An empty string means there is no usable destination to report.
+   */
   normalized: string;
+  /** False when the input could not be parsed as a URL at all. */
+  parseable: boolean;
   protocol: string;
   hostname: string;
   registrableDomain: string | null;

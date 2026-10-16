@@ -1,5 +1,6 @@
 import { detectHomoglyphs, findBrandMatches } from "./similarityAnalyzer";
-import { normalizeURL } from "./normalizer";
+import { normalizeURL, stripParserEdgeCharacters } from "./normalizer";
+import { decodeIDN } from "./unicodeAnalyzer";
 import { analyzeKeywords, extractURLFeatures } from "./lexicalAnalyzer";
 import { analyzeUnicode } from "./unicodeAnalyzer";
 import { Evidence, KeywordAnalysis, URLAnalysisResult } from "./types";
@@ -124,14 +125,22 @@ function buildEvidence(
 export function analyzeURL(input: string): URLAnalysisResult {
   const normalized = normalizeURL(input);
   const features = extractURLFeatures(normalized);
-  const rawInput = input.trim();
+  const rawInput = stripParserEdgeCharacters(input);
   const keywords = analyzeKeywords(rawInput || normalized.original);
-  const unicode = analyzeUnicode(
-    rawInput || normalized.hostname || normalized.original,
-  );
-  const homoglyph = detectHomoglyphs(
-    rawInput || normalized.hostname || normalized.original,
-  );
+  // Unicode and homoglyph findings describe the host that is being visited. Reading
+  // them from the whole URL reports any non-ASCII character in a path or query as an
+  // IDN characteristic of the destination, which is not evidence about the host. The
+  // host is decoded first because the parsed form is punycode, where the characters
+  // an analyst needs to see have already been replaced by ASCII.
+  const hostOrInput = normalized.hostname
+    ? decodeIDN(normalized.hostname)
+    : rawInput || normalized.original;
+  const unicode = analyzeUnicode(hostOrInput);
+  if (normalized.hostname && /xn--/i.test(normalized.hostname)) {
+    // The xn-- marker only survives in the ASCII form, so restore it for IDN hosts.
+    unicode.isPunycode = true;
+  }
+  const homoglyph = detectHomoglyphs(hostOrInput);
   const brands = findBrandMatches(
     normalized.hostname || rawInput || normalized.original,
   );
@@ -146,7 +155,7 @@ export function analyzeURL(input: string): URLAnalysisResult {
     normalized,
   );
   let resourceType: URLAnalysisResult["resourceType"] = "UNKNOWN_RESOURCE";
-  if (normalized.hostname) {
+  if (normalized.hostname && normalized.normalized) {
     try {
       resourceType = classifyResourceType(new URL(normalized.normalized));
     } catch {
@@ -155,7 +164,9 @@ export function analyzeURL(input: string): URLAnalysisResult {
   }
 
   return {
-    valid: Boolean(normalized.hostname && !/\s/.test(normalized.original)),
+    // An unparseable input, or one without a host the analyzers can name, is never
+    // reported as a valid target regardless of how the rest of the text looks.
+    valid: normalized.parseable && Boolean(normalized.hostname),
     normalized,
     features,
     unicode,

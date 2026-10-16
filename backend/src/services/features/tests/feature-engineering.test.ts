@@ -12,6 +12,7 @@ function sampleInput(): FeatureAnalysisInput {
       normalized: {
         original: "https://random.test/login",
         normalized: "https://random.test/login",
+        parseable: true,
         protocol: "https",
         hostname: "random.test",
         registrableDomain: "random.test",

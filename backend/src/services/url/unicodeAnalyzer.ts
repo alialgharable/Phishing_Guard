@@ -1,4 +1,4 @@
-import punycode from "node:punycode";
+import { domainToUnicode } from "node:url";
 import { UnicodeAnalysis } from "./types";
 
 const SCRIPT_PATTERNS: Array<{ name: string; regex: RegExp }> = [
@@ -25,7 +25,17 @@ export function normalizeUnicode(value: string): string {
 }
 
 export function decodeIDN(value: string): string {
-  return value.includes("xn--") ? punycode.toUnicode(value) : value;
+  if (!value.toLowerCase().includes("xn--")) {
+    return value;
+  }
+
+  try {
+    // ICU handles per-label conversion and any reserved characters. node:punycode is
+    // deprecated (DEP0040) and decodes label by label without validation.
+    return domainToUnicode(value) || value;
+  } catch {
+    return value;
+  }
 }
 
 export function analyzeUnicode(value: string): UnicodeAnalysis {

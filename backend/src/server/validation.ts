@@ -1,4 +1,5 @@
 import { RedirectPolicy } from "../services/redirects/redirectPolicy";
+import { stripParserEdgeCharacters } from "../services/url/normalizer";
 
 export type ScanValidationError =
   | "INVALID_URL"
@@ -29,7 +30,10 @@ export async function validateScanRequest(
       code: "INVALID_URL",
       message: "Request must contain a URL string.",
     };
-  const url = (payload as { url: string }).url.trim();
+  // The URL parser's own edge rule is used rather than String.trim(): trimming Unicode
+  // spaces can rescue a host the parser would reject, and intake must not disagree
+  // with the analyzers about what the submitted destination is.
+  const url = stripParserEdgeCharacters((payload as { url: string }).url);
   if (!url || url.length > maxUrlLength)
     return {
       ok: false,
