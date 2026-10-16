@@ -1,41 +1,36 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+node_modules/
+backend/dist/
+backend/node_modules/
+ml/models/artifacts/
+ml/data/processed/
+ml/data/splits/
+__pycache__/
+*.pyc
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
+# Environment variables and secrets
 .env*
+!.env.example
+!**/.env.example
 
-# vercel
-.vercel
+# Python
+.venv/
+**/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 
-# typescript
+# Node.js and generated output
+node_modules/
+**/.next/
+**/out/
+**/coverage/
 *.tsbuildinfo
 next-env.d.ts
+
+# Build output
+backend/dist/
+
+# Local ML artifacts and datasets
+ml/models/artifacts/
+ml/data/processed/
+ml/data/splits/

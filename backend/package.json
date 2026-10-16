@@ -1,0 +1,28 @@
+{
+  "name": "phishguard-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "start": "node dist/src/server/main.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "jsqr": "^1.4.0",
+    "p-limit": "^7.3.3",
+    "parse5": "^7.1.2",
+    "playwright": "^1.63.0",
+    "sharp": "^0.35.5",
+    "tesseract.js": "^7.0.0",
+    "tldts": "^6.1.21"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

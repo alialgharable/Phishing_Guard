@@ -1,0 +1,1545 @@
+{
+  "version": "1.0.0",
+  "features": [
+    {
+      "name": "url_length",
+      "type": "numeric",
+      "description": "Normalized URL length",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "hostname_length",
+      "type": "numeric",
+      "description": "Hostname length",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "path_length",
+      "type": "numeric",
+      "description": "Path length",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "query_length",
+      "type": "numeric",
+      "description": "Query length",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "fragment_length",
+      "type": "numeric",
+      "description": "Fragment length",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "dot_count",
+      "type": "numeric",
+      "description": "Dot count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "hyphen_count",
+      "type": "numeric",
+      "description": "Hyphen count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "underscore_count",
+      "type": "numeric",
+      "description": "Underscore count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "slash_count",
+      "type": "numeric",
+      "description": "Slash count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "question_mark_count",
+      "type": "numeric",
+      "description": "Question mark count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "ampersand_count",
+      "type": "numeric",
+      "description": "Ampersand count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "equals_count",
+      "type": "numeric",
+      "description": "Equals count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "percent_count",
+      "type": "numeric",
+      "description": "Percent count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "at_symbol_count",
+      "type": "numeric",
+      "description": "At-symbol count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "digit_count",
+      "type": "numeric",
+      "description": "Digit count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "letter_count",
+      "type": "numeric",
+      "description": "Letter count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "special_character_count",
+      "type": "numeric",
+      "description": "Special-character count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "subdomain_count",
+      "type": "numeric",
+      "description": "Subdomain count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "suspicious_keyword_count",
+      "type": "numeric",
+      "description": "Suspicious keyword count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "authentication_keyword_count",
+      "type": "numeric",
+      "description": "Authentication keyword count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "financial_keyword_count",
+      "type": "numeric",
+      "description": "Financial keyword count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "urgency_keyword_count",
+      "type": "numeric",
+      "description": "Urgency keyword count",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "url_entropy",
+      "type": "numeric",
+      "description": "Character entropy of the normalized URL",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "has_ip_address",
+      "type": "boolean",
+      "description": "URL uses an IP address",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_ipv4",
+      "type": "boolean",
+      "description": "URL uses IPv4",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_ipv6",
+      "type": "boolean",
+      "description": "URL uses IPv6",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_port",
+      "type": "boolean",
+      "description": "URL has an explicit port",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_credentials",
+      "type": "boolean",
+      "description": "URL contains credentials",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_at_symbol",
+      "type": "boolean",
+      "description": "URL contains an at symbol",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_punycode",
+      "type": "boolean",
+      "description": "Hostname contains punycode",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "protocol_is_https",
+      "type": "boolean",
+      "description": "Protocol is HTTPS",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "protocol_is_http",
+      "type": "boolean",
+      "description": "Protocol is HTTP",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_fragment",
+      "type": "boolean",
+      "description": "URL has a fragment",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_query",
+      "type": "boolean",
+      "description": "URL has a query",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_path",
+      "type": "boolean",
+      "description": "URL has a path",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_explicit_port",
+      "type": "boolean",
+      "description": "URL has an explicit port",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "hostname_has_trailing_dot",
+      "type": "boolean",
+      "description": "Original hostname has a trailing dot",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "contains_unicode",
+      "type": "boolean",
+      "description": "Hostname contains Unicode",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "contains_mixed_scripts",
+      "type": "boolean",
+      "description": "Unicode analysis found mixed scripts",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "contains_suspicious_unicode",
+      "type": "boolean",
+      "description": "Unicode analysis found suspicious characters",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "contains_homoglyph",
+      "type": "boolean",
+      "description": "Homoglyph analysis found a possible visual match",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "punycode_label_count",
+      "type": "numeric",
+      "description": "Number of punycode labels",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "unicode_label_count",
+      "type": "numeric",
+      "description": "Number of non-ASCII hostname labels",
+      "source": "url-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "brand_match_count",
+      "type": "numeric",
+      "description": "Number of Phase 6 brand matches",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "brand_keyword_match_count",
+      "type": "numeric",
+      "description": "Number of brand matches found in keyword or text context",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "max_brand_similarity",
+      "type": "numeric",
+      "description": "Maximum brand similarity",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_detected",
+      "type": "boolean",
+      "description": "Brand feature brand_detected",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_in_hostname",
+      "type": "boolean",
+      "description": "Brand feature brand_in_hostname",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_in_path",
+      "type": "boolean",
+      "description": "Brand feature brand_in_path",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_in_title",
+      "type": "boolean",
+      "description": "Brand feature brand_in_title",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_in_heading",
+      "type": "boolean",
+      "description": "Brand feature brand_in_heading",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_in_form",
+      "type": "boolean",
+      "description": "Brand feature brand_in_form",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_domain_mismatch",
+      "type": "boolean",
+      "description": "Brand feature brand_domain_mismatch",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "domain_age_days",
+      "type": "numeric",
+      "description": "Domain age in days when known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "domain_age_log",
+      "type": "numeric",
+      "description": "log1p domain age when known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "domain_age_known",
+      "type": "boolean",
+      "description": "Domain observation domain_age_known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "domain_registration_known",
+      "type": "boolean",
+      "description": "Domain observation domain_registration_known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "domain_expiration_known",
+      "type": "boolean",
+      "description": "Domain observation domain_expiration_known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "nameserver_count",
+      "type": "numeric",
+      "description": "Domain observation nameserver_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "a_record_count",
+      "type": "numeric",
+      "description": "Domain observation a_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "aaaa_record_count",
+      "type": "numeric",
+      "description": "Domain observation aaaa_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "mx_record_count",
+      "type": "numeric",
+      "description": "Domain observation mx_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "ns_record_count",
+      "type": "numeric",
+      "description": "Domain observation ns_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "txt_record_count",
+      "type": "numeric",
+      "description": "Domain observation txt_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "cname_record_count",
+      "type": "numeric",
+      "description": "Domain observation cname_record_count",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "asn_known",
+      "type": "boolean",
+      "description": "Domain observation asn_known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "domain_reputation_available",
+      "type": "boolean",
+      "description": "Domain observation domain_reputation_available",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "domain_reputation_listed",
+      "type": "boolean",
+      "description": "Domain observation domain_reputation_listed",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "registrar_present",
+      "type": "boolean",
+      "description": "Domain observation registrar_present",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "dns_available",
+      "type": "boolean",
+      "description": "Domain observation dns_available",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "dns_error",
+      "type": "boolean",
+      "description": "Domain observation dns_error",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "privacy_protection_detected",
+      "type": "boolean",
+      "description": "Domain observation privacy_protection_detected",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_private_resolution",
+      "type": "boolean",
+      "description": "Domain observation has_private_resolution",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_localhost_resolution",
+      "type": "boolean",
+      "description": "Domain observation has_localhost_resolution",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "has_suspicious_cname",
+      "type": "boolean",
+      "description": "Domain observation has_suspicious_cname",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "asn_number",
+      "type": "numeric",
+      "description": "Autonomous system number when known",
+      "source": "domain-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "google_webrisk_queried",
+      "type": "boolean",
+      "description": "Threat-intelligence observation google_webrisk_queried",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "google_webrisk_listed",
+      "type": "boolean",
+      "description": "Threat-intelligence observation google_webrisk_listed",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "phishtank_queried",
+      "type": "boolean",
+      "description": "Threat-intelligence observation phishtank_queried",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "phishtank_listed",
+      "type": "boolean",
+      "description": "Threat-intelligence observation phishtank_listed",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "urlhaus_queried",
+      "type": "boolean",
+      "description": "Threat-intelligence observation urlhaus_queried",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "urlhaus_listed",
+      "type": "boolean",
+      "description": "Threat-intelligence observation urlhaus_listed",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "threat_intel_provider_count",
+      "type": "numeric",
+      "description": "Threat-intelligence count threat_intel_provider_count",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "threat_intel_queried_count",
+      "type": "numeric",
+      "description": "Threat-intelligence count threat_intel_queried_count",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "threat_intel_positive_count",
+      "type": "numeric",
+      "description": "Threat-intelligence count threat_intel_positive_count",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "threat_intel_available_count",
+      "type": "numeric",
+      "description": "Threat-intelligence count threat_intel_available_count",
+      "source": "threat-intelligence",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "redirect_count",
+      "type": "numeric",
+      "description": "Redirect observation redirect_count",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "redirect_chain_length",
+      "type": "numeric",
+      "description": "Redirect observation redirect_chain_length",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "max_redirect_hop_duration_ms",
+      "type": "numeric",
+      "description": "Redirect observation max_redirect_hop_duration_ms",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "total_redirect_duration_ms",
+      "type": "numeric",
+      "description": "Redirect observation total_redirect_duration_ms",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "cross_domain_redirect_count",
+      "type": "numeric",
+      "description": "Redirect observation cross_domain_redirect_count",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "unique_redirect_domain_count",
+      "type": "numeric",
+      "description": "Redirect observation unique_redirect_domain_count",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "redirect_analysis_available",
+      "type": "boolean",
+      "description": "Redirect observation redirect_analysis_available",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "redirect_loop_detected",
+      "type": "boolean",
+      "description": "Redirect observation redirect_loop_detected",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "max_redirects_reached",
+      "type": "boolean",
+      "description": "Redirect observation max_redirects_reached",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "redirect_error",
+      "type": "boolean",
+      "description": "Redirect observation redirect_error",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "final_url_changed",
+      "type": "boolean",
+      "description": "Redirect observation final_url_changed",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "final_domain_changed",
+      "type": "boolean",
+      "description": "Redirect observation final_domain_changed",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "final_protocol_changed",
+      "type": "boolean",
+      "description": "Redirect observation final_protocol_changed",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "redirect_http_to_https",
+      "type": "boolean",
+      "description": "Redirect observation redirect_http_to_https",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "redirect_https_to_http",
+      "type": "boolean",
+      "description": "Redirect observation redirect_https_to_http",
+      "source": "redirect-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "content_available",
+      "type": "boolean",
+      "description": "Content or brand observation content_available",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "content_type_html",
+      "type": "boolean",
+      "description": "Content or brand observation content_type_html",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "html_parse_success",
+      "type": "boolean",
+      "description": "Content or brand observation html_parse_success",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "page_title_present",
+      "type": "boolean",
+      "description": "Content or brand observation page_title_present",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "page_language_present",
+      "type": "boolean",
+      "description": "Content or brand observation page_language_present",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "login_context_detected",
+      "type": "boolean",
+      "description": "Content or brand observation login_context_detected",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "credential_collection_context",
+      "type": "boolean",
+      "description": "Content or brand observation credential_collection_context",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "password_form_detected",
+      "type": "boolean",
+      "description": "Content or brand observation password_form_detected",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "external_credential_destination",
+      "type": "boolean",
+      "description": "Content or brand observation external_credential_destination",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "brand_login_detected",
+      "type": "boolean",
+      "description": "Content or brand observation brand_login_detected",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "login_brand_domain_mismatch",
+      "type": "boolean",
+      "description": "Content or brand observation login_brand_domain_mismatch",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "favicon_present",
+      "type": "boolean",
+      "description": "Content or brand observation favicon_present",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "favicon_external",
+      "type": "boolean",
+      "description": "Content or brand observation favicon_external",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "favicon_domain_matches",
+      "type": "boolean",
+      "description": "Content or brand observation favicon_domain_matches",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "favicon_relationship_known",
+      "type": "boolean",
+      "description": "Content or brand observation favicon_relationship_known",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "form_count",
+      "type": "numeric",
+      "description": "Content or wording observation form_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "password_field_count",
+      "type": "numeric",
+      "description": "Content or wording observation password_field_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "email_field_count",
+      "type": "numeric",
+      "description": "Content or wording observation email_field_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "username_field_count",
+      "type": "numeric",
+      "description": "Content or wording observation username_field_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "hidden_field_count",
+      "type": "numeric",
+      "description": "Content or wording observation hidden_field_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "credential_field_count",
+      "type": "numeric",
+      "description": "Content or wording observation credential_field_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "external_form_count",
+      "type": "numeric",
+      "description": "Content or wording observation external_form_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "cross_domain_form_count",
+      "type": "numeric",
+      "description": "Content or wording observation cross_domain_form_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "http_form_action_count",
+      "type": "numeric",
+      "description": "Content or wording observation http_form_action_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "script_count",
+      "type": "numeric",
+      "description": "Content or wording observation script_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "inline_script_count",
+      "type": "numeric",
+      "description": "Content or wording observation inline_script_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "external_script_count",
+      "type": "numeric",
+      "description": "Content or wording observation external_script_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "suspicious_script_pattern_count",
+      "type": "numeric",
+      "description": "Content or wording observation suspicious_script_pattern_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "iframe_count",
+      "type": "numeric",
+      "description": "Content or wording observation iframe_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "meta_refresh_count",
+      "type": "numeric",
+      "description": "Content or wording observation meta_refresh_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "link_count",
+      "type": "numeric",
+      "description": "Content or wording observation link_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "external_link_count",
+      "type": "numeric",
+      "description": "Content or wording observation external_link_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "resource_count",
+      "type": "numeric",
+      "description": "Content or wording observation resource_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "external_resource_count",
+      "type": "numeric",
+      "description": "Content or wording observation external_resource_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "unique_external_domain_count",
+      "type": "numeric",
+      "description": "Content or wording observation unique_external_domain_count",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "urgency_term_count",
+      "type": "numeric",
+      "description": "Content or wording observation urgency_term_count",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "authentication_term_count",
+      "type": "numeric",
+      "description": "Content or wording observation authentication_term_count",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "financial_term_count",
+      "type": "numeric",
+      "description": "Content or wording observation financial_term_count",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "credential_recovery_term_count",
+      "type": "numeric",
+      "description": "Content or wording observation credential_recovery_term_count",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "external_resource_ratio",
+      "type": "numeric",
+      "description": "Bounded resource ratio external_resource_ratio",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "external_script_ratio",
+      "type": "numeric",
+      "description": "Bounded resource ratio external_script_ratio",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "external_link_ratio",
+      "type": "numeric",
+      "description": "Bounded resource ratio external_link_ratio",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "external_form_ratio",
+      "type": "numeric",
+      "description": "Bounded resource ratio external_form_ratio",
+      "source": "content-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "urgency_authentication_combination",
+      "type": "boolean",
+      "description": "Contextual wording combination urgency_authentication_combination",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "financial_authentication_combination",
+      "type": "boolean",
+      "description": "Contextual wording combination financial_authentication_combination",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "credential_recovery_combination",
+      "type": "boolean",
+      "description": "Contextual wording combination credential_recovery_combination",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": 0,
+      "max": 1
+    },
+    {
+      "name": "form_same_origin",
+      "type": "numeric",
+      "description": "Domain relationship count form_same_origin",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "form_same_registrable_domain",
+      "type": "numeric",
+      "description": "Domain relationship count form_same_registrable_domain",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "form_official_brand_domain",
+      "type": "numeric",
+      "description": "Domain relationship count form_official_brand_domain",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "form_known_third_party",
+      "type": "numeric",
+      "description": "Domain relationship count form_known_third_party",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "form_external",
+      "type": "numeric",
+      "description": "Domain relationship count form_external",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "form_relationship_unknown",
+      "type": "numeric",
+      "description": "Domain relationship count form_relationship_unknown",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    },
+    {
+      "name": "page_identity",
+      "type": "categorical",
+      "description": "Categorical page identity detected by Phase 6",
+      "source": "brand-analysis",
+      "nullable": false,
+      "version": "1.0.0",
+      "min": null,
+      "max": null
+    }
+  ]
+}
