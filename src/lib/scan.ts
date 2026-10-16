@@ -1,3 +1,5 @@
+import type { UrlIssue } from "./url/types";
+
 export const RISK_STATES = [
   "KNOWN_MALWARE",
   "KNOWN_PHISHING",
@@ -40,16 +42,52 @@ export interface ThreatIntelligenceStatus {
   category?: string;
   confidence?: number | null;
 }
+export interface RedirectObservation {
+  url: string;
+  status: number;
+  location?: string;
+}
+export interface NetworkRequestObservation {
+  method: string;
+  url: string;
+  domain?: string;
+  resourceType: string;
+  status?: number;
+  contentType?: string;
+  contentLength?: number;
+  initiator?: string;
+}
+export interface DownloadObservation {
+  filename: string;
+  url: string;
+  contentType?: string;
+  size?: number;
+  sha256?: string;
+  timestamp: string;
+  limitExceeded?: boolean;
+}
+export interface ScreenshotObservation {
+  artifactId: string;
+  format: "png";
+  width: number;
+  height: number;
+  bytes: number;
+  timestamp: string;
+}
 export interface SandboxResult {
-  status: "available" | "unavailable" | "error";
+  status: "available" | "unavailable" | "timeout" | "blocked" | "error";
   finalUrl?: string;
-  redirects: string[];
+  httpStatus?: number;
+  redirects: Array<string | RedirectObservation>;
   domainsContacted: string[];
-  networkRequests: string[];
-  downloads: string[];
-  screenshots: string[];
+  networkRequests: Array<string | NetworkRequestObservation>;
+  downloads: Array<string | DownloadObservation>;
+  screenshots: Array<string | ScreenshotObservation>;
   behaviorObservations: EvidenceItem[];
   message?: string;
+  durationMs?: number;
+  terminationReason?: string;
+  limitsReached?: string[];
 }
 export interface RiskAssessment {
   state: RiskState;
@@ -66,9 +104,19 @@ export interface RiskAssessment {
   explanation: string;
   threatIntelligenceStatuses: ThreatIntelligenceStatus[];
 }
+export interface UrlNormalizationSummary {
+  status: "ok" | "rejected";
+  /** Host used for policy and comparison after canonicalization. */
+  canonicalHostname: string;
+  /** Rewrites the parser had to perform. Context only: never a safety claim. */
+  issues: UrlIssue[];
+}
 export interface ScanResponse {
   requestId: string;
   url: string;
+  /** The submitted text exactly as sent, kept so a rewrite is never hidden. */
+  requestedUrl?: string;
+  urlNormalization?: UrlNormalizationSummary;
   riskAssessment: RiskAssessment;
   resourceType: ResourceType;
   sandbox: SandboxResult;

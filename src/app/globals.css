@@ -412,6 +412,17 @@ small {
 
 .status-copy { padding-top: 18px; }
 .status-copy h3 { font-size: 18px; font-weight: 500; margin-bottom: 7px; }
+.scan-progress { margin: 28px 0 0; }
+.progress-list { display: grid; gap: 10px; color: var(--muted); font: 13px Arial, sans-serif; }
+.progress-list span { display: flex; align-items: center; gap: 9px; }
+.progress-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--teal); display: inline-block; }
+.progress-dot.running { box-shadow: 0 0 0 5px rgba(15, 118, 110, .12); }
+.sandbox-panel { margin-bottom: 18px; }
+.sandbox-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 18px 0 0; }
+.sandbox-stats div { min-width: 0; border-bottom: 1px solid var(--line); padding-bottom: 9px; }
+.sandbox-stats dt { color: var(--muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px; }
+.sandbox-stats dd { margin: 0; color: var(--ink); font: 13px Arial, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sandbox-evidence { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 16px; }
 .provider-list { display: grid; gap: 7px; border-top: 1px solid var(--line); margin-top: 18px; padding-top: 15px; color: var(--muted); font: 11px Arial, sans-serif; }
 .provider-list b { color: var(--ink); }
 .history-url { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

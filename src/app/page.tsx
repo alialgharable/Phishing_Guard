@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { RiskAssessment, RiskState, ScanResponse, scanUrl } from "../lib/scan";
+import { RiskAssessment, RiskState, SandboxResult, ScanResponse, scanUrl } from "../lib/scan";
 
 const stateLabels: Record<RiskState, string> = {
   KNOWN_MALWARE: "Known malware",
@@ -58,6 +58,7 @@ export default function Home() {
   }, []);
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (status === "loading") return;
     if (!url.trim()) {
       setStatus("error");
       setError("Enter a URL to begin the analysis.");
@@ -138,6 +139,7 @@ export default function Home() {
           </p>
         </form>
       </section>
+      {status === "loading" && <ScanProgress />}
       {status === "error" && (
         <div className="notice error" role="alert">
           <strong>Analysis incomplete</strong>
@@ -148,6 +150,7 @@ export default function Home() {
         <ResultPanel
           assessment={result.riskAssessment}
           resourceType={result.resourceType}
+          sandbox={result.sandbox}
         />
       )}
       {!result && status === "idle" && (
@@ -207,9 +210,11 @@ export default function Home() {
 function ResultPanel({
   assessment,
   resourceType,
+  sandbox,
 }: {
   assessment: RiskAssessment;
   resourceType: ScanResponse["resourceType"];
+  sandbox: SandboxResult;
 }) {
   const unavailable = Object.entries(assessment.availability)
     .filter(([, available]) => !available)
@@ -236,6 +241,7 @@ function ResultPanel({
       <div className="result-grid">
         <div className="column">
           <EvidenceSection assessment={assessment} />
+          <SandboxSection sandbox={sandbox} />
           <ThreatSection assessment={assessment} />
           <ConfigurationSection assessment={assessment} />
         </div>
@@ -287,6 +293,74 @@ function ResultPanel({
     </section>
   );
 }
+function ScanProgress() {
+  return (
+    <section className="panel scan-progress" aria-live="polite">
+      <p className="eyebrow">ANALYZING</p>
+      <div className="progress-list">
+        <span><b className="progress-dot running" />Static analysis running</span>
+        <span><b className="progress-dot running" />Threat intelligence running</span>
+        <span><b className="progress-dot running" />Sandbox running</span>
+      </div>
+    </section>
+  );
+}
+
+function formatSandboxStatus(status: SandboxResult["status"]) {
+  return status.replace("_", " ").replace(/^./, (letter) => letter.toUpperCase());
+}
+
+function formatDuration(ms?: number) {
+  if (ms === undefined) return "—";
+  return `${(ms / 1000).toFixed(ms >= 10_000 ? 1 : 2)}s`;
+}
+
+function SandboxSection({ sandbox }: { sandbox: SandboxResult }) {
+  const unavailable = sandbox.status !== "available";
+  const evidence = sandbox.behaviorObservations.filter((item) => item.source === "sandbox");
+  return (
+    <div className="panel sandbox-panel">
+      <div className="panel-heading">
+        <p className="eyebrow">SANDBOX ANALYSIS</p>
+        <span>{formatSandboxStatus(sandbox.status)}</span>
+      </div>
+      {unavailable ? (
+        <div className="status-copy">
+          <h3>{formatSandboxStatus(sandbox.status)}</h3>
+          <p className="muted">
+            {sandbox.message ?? "Dynamic sandbox analysis could not be performed."}
+          </p>
+          <p className="muted">This is an operational limitation, not evidence that the URL is safe or malicious.</p>
+        </div>
+      ) : (
+        <>
+          <dl className="sandbox-stats">
+            <div><dt>Status</dt><dd>{formatSandboxStatus(sandbox.status)}</dd></div>
+            <div><dt>Duration</dt><dd>{formatDuration(sandbox.durationMs)}</dd></div>
+            <div><dt>HTTP status</dt><dd>{sandbox.httpStatus ?? "—"}</dd></div>
+            <div><dt>Final URL</dt><dd title={sandbox.finalUrl}>{sandbox.finalUrl ?? "—"}</dd></div>
+            <div><dt>Redirects</dt><dd>{sandbox.redirects.length}</dd></div>
+            <div><dt>Requests</dt><dd>{sandbox.networkRequests.length}</dd></div>
+            <div><dt>Domains</dt><dd>{sandbox.domainsContacted.length}</dd></div>
+            <div><dt>Downloads</dt><dd>{sandbox.downloads.length}</dd></div>
+            <div><dt>Screenshot</dt><dd>{sandbox.screenshots.length > 0 ? "Captured" : "Not captured"}</dd></div>
+          </dl>
+          {evidence.length > 0 && (
+            <div className="sandbox-evidence">
+              <p className="eyebrow">BEHAVIORAL EVIDENCE</p>
+              <ul className="uncertainty-list">
+                {evidence.map((item, index) => (
+                  <li key={`${item.type}-${index}`}>{item.description}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function EvidenceSection({ assessment }: { assessment: RiskAssessment }) {
   return (
     <div className="panel">
