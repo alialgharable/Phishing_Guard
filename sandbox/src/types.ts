@@ -28,6 +28,14 @@ export interface NetworkRequestObservation {
   contentType?: string;
   contentLength?: number;
   initiator?: string;
+  /**
+   * "attempted" covers every request the browser started; it becomes "responded" only
+   * once a response actually arrived. A request the policy refused therefore stays an
+   * attempt with no status, rather than looking like traffic that was served.
+   */
+  outcome?: "attempted" | "responded";
+  /** Why the sandbox refused this request. Records policy, not a verdict about the URL. */
+  blockedReason?: string;
 }
 
 export interface DownloadObservation {
@@ -62,6 +70,8 @@ export interface SandboxResult {
   message?: string;
   durationMs?: number;
   terminationReason?: string;
+  /** Destination the sandbox policy refused, when navigation was blocked. */
+  blockedUrl?: string;
   limitsReached?: string[];
 }
 

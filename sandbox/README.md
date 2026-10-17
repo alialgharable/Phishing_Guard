@@ -77,11 +77,57 @@ Examples blocked by default:
 
 The service blocks `localhost` and `*.localhost` by name and blocks non-HTTP(S) protocols.
 
-### DNS rebinding and redirect validation
+### Redirects, DNS rebinding, and how refusals are reported
 
-The initial hostname is resolved and validated before navigation. Browser request interception applies the same DNS-and-IP policy to redirects, iframe URLs, image/script/style/font/media/API requests, and JavaScript-triggered requests. Redirects are recorded as ordered `{ url, status, location }` evidence. The maximum redirect count is enforced and reported as a limit condition.
+One decision point (`src/request-gate.ts`) is used for every request the browser makes:
+the submitted navigation, each hop the browser follows after a 3xx response, iframe
+documents, and `script`/`image`/`stylesheet`/`fetch`/`xhr`/`font`/`media`/`websocket`
+subresources. It is wired into `context.route("**/*")`, so a refusal happens before the
+socket opens - validating the URL after `page.goto()` resolves would be too late, since
+the browser would already have spoken to the prohibited host.
 
-Known limitation: application-layer validation reduces SSRF risk but is not equivalent to a kernel/network-level egress firewall. Production deployments should add VM/firewall/eBPF/proxy enforcement that denies private/internal CIDRs regardless of browser DNS behavior.
+- A `Location` header that cannot be resolved, uses a non-HTTP(S) protocol, or points at
+  a prohibited destination is refused; so is a protocol-relative or obfuscated form such as
+  `//127.0.0.1/`, `http://2130706433/`, or `http://0x7f000001/`.
+- Every resolved address of a hostname is checked, so a record that contains both a public
+  and a loopback address is refused.
+- If a destination cannot be established as allowed - unparseable URL, DNS failure, empty
+  DNS answer, an address that is not evaluable, or an internal error while deciding - the
+  request is refused. Failures to evaluate are never read as permission.
+- `SANDBOX_MAX_REDIRECTS` is enforced at the request layer (one main-frame document hop per
+  redirect) and `SANDBOX_MAX_REQUESTS` bounds all resource types, so a redirect loop cannot
+  keep issuing requests until the overall timeout fires.
+
+Reporting distinguishes a policy refusal from a broken network:
+
+| Outcome | `status` | `terminationReason` |
+| --- | --- | --- |
+| submitted destination refused before navigation | `blocked` | `destination_blocked` |
+| browser-followed redirect refused | `blocked` | `redirect_destination_blocked` |
+| navigation landed on a prohibited host despite the policy | `blocked` | `final_destination_blocked` |
+| hop or request budget hit | `blocked` | `max_redirects` / `max_requests` |
+| genuine network failure, DNS failure, TLS failure | `error` | `navigation_failed` |
+| navigation did not settle in time | `error` | `navigation_timeout` |
+| service or browser could not run | `error` | `sandbox_failure` |
+
+A blocked result carries `blockedUrl`, a `message` naming the policy reason, and evidence
+(`sandbox_destination_blocked`, `sandbox_redirect_blocked`, `sandbox_navigation_blocked`,
+`sandbox_request_blocked`) that repeats both. Because a policy abort surfaces from Chromium as
+`net::ERR_BLOCKED_BY_CLIENT`, the classification comes from the decision recorded during
+interception and never from that string alone: an abort this service did not record stays
+`error`. `networkRequests[].outcome` is `"attempted"` for every request the browser started and
+becomes `"responded"` only when a reply arrived, with `blockedReason` set on refused ones; a
+blocked request therefore cannot be mistaken for a successful fetch. Refused subresources inside
+an otherwise normal page stay evidence and do not change the page's result.
+
+Known limitation: Chromium resolves DNS for itself, so between this service's check and
+Chromium's connection the answer can change (classic DNS rebinding), and a browser that
+resolves a name to a prohibited address *after* the check has been made is only caught by the
+response-level re-check on the final URL. Closing that gap needs `--host-resolver-rules` with
+pinned answers, or a proxy/network namespace this service does not control. Application-layer
+validation reduces SSRF risk but is not a kernel/network-level egress firewall: production
+deployments should still add VM/firewall/eBPF/proxy enforcement that denies private and internal
+CIDRs regardless of browser DNS behavior.
 
 ## Passive browser policy
 
@@ -174,6 +220,18 @@ curl http://127.0.0.1:4001/health
 curl http://127.0.0.1:4001/ready
 ```
 
+The refusal path can be checked without a browser, because the submitted destination is
+validated before Chromium starts - it should answer with
+`{"status":"blocked","terminationReason":"destination_blocked","blockedUrl":"http://127.0.0.1:9000/admin", ...}`:
+
+```bash
+curl -sS \
+  -H 'Authorization: Bearer dev-internal-token' \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"http://127.0.0.1:9000/admin","requestId":"loopback-check"}' \
+  http://127.0.0.1:4001/analyze | jq
+```
+
 Connect PhishGuard to the service:
 
 ```bash
@@ -212,3 +270,11 @@ PhishGuard listens on `http://localhost:3000`. The sandbox service is attached t
 - Response bodies are intentionally not retained in this first version.
 - Screenshots are identified by internal artifact IDs; no public artifact download API is exposed.
 - Behavioral observations are evidence, not verdicts or scores.
+- A blocked navigation produces no screenshot and no `httpStatus`: nothing about the
+  refused destination is inferred, only the attempt is recorded.
+- `RUN_SANDBOX_E2E=1 npm --workspace @phishguard/sandbox-service run test:e2e` covers both
+  the normal-page flow and the redirect-security flow in a real Chromium, including a
+  listener on the prohibited address that must stay untouched. It needs the browser to
+  share the test process's loopback for the counter assertion, and public internet egress
+  for the public-to-public redirect case (those tests skip themselves when the fixture is
+  unreachable rather than passing vacuously).
