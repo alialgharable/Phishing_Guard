@@ -1,28 +1,25 @@
 
-FROM mcr.microsoft.com/playwright:v1.63.0-noble
+FROM mcr.microsoft.com/playwright:v1.55.1-noble
 
 WORKDIR /app
 
-# Install native build tools required by better-sqlite3.
-USER root
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       python3 \
-       make \
-       g++ \
-    && rm -rf /var/lib/apt/lists/*
+ENV HOST=0.0.0.0 \
+    PORT=4001 \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    SANDBOX_ARTIFACT_DIR=/tmp/phishguard-sandbox-artifacts
 
-COPY package*.json ./
-RUN npm ci --omit=dev --foreground-scripts
+COPY package.json ./
+RUN npm install
 
-COPY dist ./dist
+COPY tsconfig.json ./
+COPY src ./src
+COPY test ./test
 
-RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin pguser && \
-    mkdir -p /profile /tmp/pg && \
-    chown -R pguser:pguser /app /profile /tmp/pg
+RUN npm run build \
+    && npm prune --omit=dev
 
-USER 10001:10001
+ENV NODE_ENV=production
 
-ENV PG_IN_SANDBOX=1
-
-ENTRYPOINT ["node", "dist/src/services/dynamic/cli.js"]
+USER pwuser
+EXPOSE 4001
+CMD ["node", "dist/src/server.js"]

@@ -11,6 +11,7 @@ const stateLabels: Record<RiskState, string> = {
   LOW_RISK: "Low risk",
   UNKNOWN: "Unknown",
 };
+
 const layerLabels: Record<string, string> = {
   url: "URL analysis",
   threatIntel: "Threat intelligence",
@@ -21,10 +22,66 @@ const layerLabels: Record<string, string> = {
   ml: "Machine learning",
   sandbox: "Dynamic sandbox analysis",
 };
+
 type HistoryItem = Pick<ScanResponse, "url" | "requestId"> & {
   state: RiskState;
   at: string;
 };
+
+function formatHistoryDate(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function buildUncertaintyList(
+  assessment: RiskAssessment,
+  unavailableLayers: string[],
+): string[] {
+  const normalize = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+
+  // Threat intelligence and ML have their own dedicated UI sections.
+  const messages = assessment.uncertainty.filter((message) => {
+    const normalized = normalize(message);
+
+    return (
+      !normalized.includes("threat intelligence") &&
+      !normalized.includes("machine learning")
+    );
+  });
+
+  // Avoid repeating capabilities already explained elsewhere.
+  const layersToReport = unavailableLayers.filter(
+    (layer) => !["threatIntel", "ml", "sandbox"].includes(layer),
+  );
+
+  for (const layer of layersToReport) {
+    const label =
+      layerLabels[layer] ?? layer.replace(/([a-z])([A-Z])/g, "$1 $2");
+    const normalizedLabel = normalize(label);
+
+    const alreadyReported = messages.some((message) =>
+      normalize(message).includes(normalizedLabel),
+    );
+
+    if (!alreadyReported) {
+      messages.push(`${label} is unavailable.`);
+    }
+  }
+
+  return [...new Set(messages)];
+}
 
 export default function Home() {
   const [url, setUrl] = useState("");
@@ -32,11 +89,13 @@ export default function Home() {
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
   useEffect(() => {
     try {
       const stored: unknown = JSON.parse(
         localStorage.getItem("phishguard-history") ?? "[]",
       );
+
       const valid = Array.isArray(stored)
         ? stored.filter(
             (item): item is HistoryItem =>
@@ -49,6 +108,7 @@ export default function Home() {
               item.state in stateLabels,
           )
         : [];
+
       // Hydrate browser-only storage after the initial server render.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setHistory(valid);
@@ -56,22 +116,28 @@ export default function Home() {
       setHistory([]);
     }
   }, []);
-  async function submit(event: FormEvent) {
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     if (!url.trim()) {
       setStatus("error");
       setError("Enter a URL to begin the analysis.");
       return;
     }
+
     setStatus("loading");
     setError("");
     setResult(null);
+
     try {
       const response = await scanUrl(url.trim());
+
       setResult(response);
       setStatus("idle");
+
       setHistory((current) => {
-        const next = [
+        const next: HistoryItem[] = [
           {
             url: response.url,
             requestId: response.requestId,
@@ -80,7 +146,13 @@ export default function Home() {
           },
           ...current.filter((item) => item.url !== response.url),
         ].slice(0, 8);
-        localStorage.setItem("phishguard-history", JSON.stringify(next));
+
+        try {
+          localStorage.setItem("phishguard-history", JSON.stringify(next));
+        } catch {
+          // Keep the current session usable if local storage is unavailable.
+        }
+
         return next;
       });
     } catch (scanError) {
@@ -92,10 +164,17 @@ export default function Home() {
       );
     }
   }
+
   function clearHistory() {
     setHistory([]);
-    localStorage.removeItem("phishguard-history");
+
+    try {
+      localStorage.removeItem("phishguard-history");
+    } catch {
+      // The visible history is cleared even if storage is unavailable.
+    }
   }
+
   return (
     <main className="shell">
       <header className="topbar">
@@ -105,6 +184,7 @@ export default function Home() {
         </div>
         <span className="header-note">Evidence-first URL analysis</span>
       </header>
+
       <section className="hero">
         <div className="hero-copy">
           <p className="eyebrow">DEFENSIVE ANALYSIS / 01</p>
@@ -114,6 +194,7 @@ export default function Home() {
             uncertainty kept visible.
           </p>
         </div>
+
         <form
           className="scan-form"
           onSubmit={submit}
@@ -127,6 +208,8 @@ export default function Home() {
               onChange={(event) => setUrl(event.target.value)}
               placeholder="https://example.com"
               autoComplete="url"
+              type="url"
+              required
             />
             <button type="submit" disabled={status === "loading"}>
               {status === "loading" ? "Analyzing..." : "Analyze URL"}
@@ -138,18 +221,21 @@ export default function Home() {
           </p>
         </form>
       </section>
+
       {status === "error" && (
         <div className="notice error" role="alert">
           <strong>Analysis incomplete</strong>
           <span>{error}</span>
         </div>
       )}
+
       {result && (
         <ResultPanel
           assessment={result.riskAssessment}
           resourceType={result.resourceType}
         />
       )}
+
       {!result && status === "idle" && (
         <section className="empty-state">
           <span className="empty-index">02</span>
@@ -162,18 +248,25 @@ export default function Home() {
           </div>
         </section>
       )}
+
       <section className="history">
         <div className="section-heading">
           <div>
             <p className="eyebrow">RECENT / LOCAL ONLY</p>
             <h2>Scan history</h2>
           </div>
+
           {history.length > 0 && (
-            <button className="text-button" onClick={clearHistory}>
+            <button
+              className="text-button"
+              onClick={clearHistory}
+              type="button"
+            >
               Clear history
             </button>
           )}
         </div>
+
         {history.length === 0 ? (
           <p className="muted">No scans stored on this device.</p>
         ) : (
@@ -183,10 +276,15 @@ export default function Home() {
                 className="history-item"
                 key={item.requestId}
                 onClick={() => setUrl(item.url)}
+                type="button"
+                title={`Use ${item.url}`}
               >
-                <span className="history-url">{item.url}</span>
+                <span className="history-url" title={item.url}>
+                  {item.url}
+                </span>
+
                 <span className="history-meta">
-                  <time dateTime={item.at}>{new Date(item.at).toLocaleString()}</time>
+                  <time dateTime={item.at}>{formatHistoryDate(item.at)}</time>
                   <b className={`state-chip state-${item.state.toLowerCase()}`}>
                     {stateLabels[item.state]}
                   </b>
@@ -196,6 +294,7 @@ export default function Home() {
           </div>
         )}
       </section>
+
       <footer>
         <span>PHISHGUARD / CONTROLLED ANALYSIS</span>
         <span>ML probability is evidence, not a verdict.</span>
@@ -211,9 +310,15 @@ function ResultPanel({
   assessment: RiskAssessment;
   resourceType: ScanResponse["resourceType"];
 }) {
-  const unavailable = Object.entries(assessment.availability)
+  const unavailableLayers = Object.entries(assessment.availability)
     .filter(([, available]) => !available)
-    .map(([layer]) => layerLabels[layer] ?? layer);
+    .map(([layer]) => layer);
+
+  const uncertaintyMessages = buildUncertaintyList(
+    assessment,
+    unavailableLayers,
+  );
+
   return (
     <section className="results" aria-live="polite">
       <div className="result-head">
@@ -227,18 +332,23 @@ function ResultPanel({
           </div>
           <p className="summary">{assessment.summary}</p>
         </div>
+
         <div className="result-meta">
           <span>{assessment.evidence.length} security observations</span>
-          <span>{assessment.independentCategoryCount} independent categories</span>
+          <span>
+            {assessment.independentCategoryCount} independent categories
+          </span>
           <span>{resourceType.replaceAll("_", " ").toLowerCase()}</span>
         </div>
       </div>
+
       <div className="result-grid">
         <div className="column">
           <EvidenceSection assessment={assessment} />
           <ThreatSection assessment={assessment} />
           <ConfigurationSection assessment={assessment} />
         </div>
+
         <aside className="column side-column">
           <div className="panel">
             <p className="eyebrow">MACHINE LEARNING</p>
@@ -253,6 +363,7 @@ function ResultPanel({
                 ? `${Math.round(assessment.ml.probability * 100)}%`
                 : "—"}
             </p>
+
             {assessment.ml.available && (
               <p className="muted">
                 {assessment.ml.calibrationMethod ??
@@ -261,23 +372,24 @@ function ResultPanel({
               </p>
             )}
           </div>
+
           <div className="panel">
             <p className="eyebrow">UNCERTAINTY</p>
-            {unavailable.length === 0 && assessment.uncertainty.length === 0 ? (
+
+            {uncertaintyMessages.length === 0 ? (
               <p className="muted">
-                All requested layers returned an availability signal.
+                No additional uncertainty messages were reported. This does not
+                establish that the URL is safe.
               </p>
             ) : (
               <ul className="uncertainty-list">
-                {[...new Set([
-                  ...assessment.uncertainty,
-                  ...unavailable.map((layer) => `${layer} is unavailable.`),
-                ])].map((item) => (
-                  <li key={item}>{item}</li>
+                {uncertaintyMessages.map((message) => (
+                  <li key={message}>{message}</li>
                 ))}
               </ul>
             )}
           </div>
+
           <div className="panel explain">
             <p className="eyebrow">WHY THIS STATE</p>
             <p>{assessment.explanation}</p>
@@ -287,6 +399,7 @@ function ResultPanel({
     </section>
   );
 }
+
 function EvidenceSection({ assessment }: { assessment: RiskAssessment }) {
   return (
     <div className="panel">
@@ -294,6 +407,7 @@ function EvidenceSection({ assessment }: { assessment: RiskAssessment }) {
         <p className="eyebrow">EVIDENCE</p>
         <span>{assessment.evidence.length}</span>
       </div>
+
       {assessment.evidence.length === 0 ? (
         <p className="muted">No evidence was returned.</p>
       ) : (
@@ -318,47 +432,82 @@ function EvidenceSection({ assessment }: { assessment: RiskAssessment }) {
     </div>
   );
 }
+
 function ThreatSection({ assessment }: { assessment: RiskAssessment }) {
   const statuses = assessment.threatIntelligenceStatuses ?? [];
-  const queried = statuses.filter((item) => ["MATCH", "NO_MATCH"].includes(item.state));
+  const queried = statuses.filter((item) =>
+    ["MATCH", "NO_MATCH"].includes(item.state),
+  );
   const available = queried.length > 0;
+
   return (
     <div className="panel">
       <div className="panel-heading">
         <p className="eyebrow">DIRECT THREAT INTELLIGENCE</p>
-        <span>{available ? `${assessment.directThreatEvidence.length} matches` : "Not available"}</span>
+        <span>
+          {available
+            ? `${assessment.directThreatEvidence.length} matches`
+            : "Not available"}
+        </span>
       </div>
+
       {!available ? (
         <div className="status-copy">
           <h3>Threat intelligence unavailable</h3>
-          <p className="muted">No configured threat-intelligence provider could be queried. This is not evidence that the URL is safe.</p>
+          <p className="muted">
+            No configured threat-intelligence provider could be queried. This is
+            not evidence that the URL is safe.
+          </p>
         </div>
       ) : assessment.directThreatEvidence.length === 0 ? (
         <div className="status-copy">
           <h3>Threat intelligence checked</h3>
-          <p className="muted">0 authoritative matches found across {queried.length} queried provider{queried.length === 1 ? "" : "s"}. This is not proof that the URL is safe.</p>
+          <p className="muted">
+            No authoritative matches were found across {queried.length} queried
+            provider{queried.length === 1 ? "" : "s"}. This is not proof that
+            the URL is safe.
+          </p>
         </div>
       ) : (
         assessment.directThreatEvidence.map((threat) => (
-          <article className="threat-item" key={`${threat.provider}-${threat.category}`}>
-            <strong>{threat.category}</strong><span>{threat.provider}</span>
+          <article
+            className="threat-item"
+            key={`${threat.provider}-${threat.category}`}
+          >
+            <strong>{threat.category}</strong>
+            <span>{threat.provider}</span>
           </article>
         ))
       )}
+
       <div className="provider-list">
-        {statuses.map((item) => <span key={item.provider}><b>{item.provider}</b> — {item.state.replace("_", " ").toLowerCase()}</span>)}
+        {statuses.map((item) => (
+          <span key={item.provider}>
+            <b>{item.provider}</b> —{" "}
+            {item.state.replace("_", " ").toLowerCase()}
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
 function ConfigurationSection({ assessment }: { assessment: RiskAssessment }) {
-  if (assessment.systemWarnings.length === 0) return null;
+  if (assessment.systemWarnings.length === 0) {
+    return null;
+  }
+
   return (
     <div className="panel">
-      <div className="panel-heading"><p className="eyebrow">CONFIGURATION</p><span>{assessment.systemWarnings.length} warnings</span></div>
+      <div className="panel-heading">
+        <p className="eyebrow">CONFIGURATION</p>
+        <span>{assessment.systemWarnings.length} warnings</span>
+      </div>
+
       <ul className="uncertainty-list">
-        {assessment.systemWarnings.map((warning) => <li key={warning}>{warning}</li>)}
+        {assessment.systemWarnings.map((warning) => (
+          <li key={warning}>{warning}</li>
+        ))}
       </ul>
     </div>
   );
