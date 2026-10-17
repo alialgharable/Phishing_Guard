@@ -111,6 +111,7 @@ export class HttpSandboxAnalyzer implements SandboxAnalyzer {
         message: typeof payload.message === "string" ? payload.message : undefined,
         durationMs: typeof payload.durationMs === "number" ? payload.durationMs : undefined,
         terminationReason: typeof payload.terminationReason === "string" ? payload.terminationReason : undefined,
+        blockedUrl: typeof payload.blockedUrl === "string" ? payload.blockedUrl : undefined,
         limitsReached: asArray<string>(payload.limitsReached).filter((item) => typeof item === "string"),
       };
     } catch (error) {

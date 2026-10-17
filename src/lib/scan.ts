@@ -56,6 +56,10 @@ export interface NetworkRequestObservation {
   contentType?: string;
   contentLength?: number;
   initiator?: string;
+  /** "attempted" until a response arrives; a policy-blocked request never does. */
+  outcome?: "attempted" | "responded";
+  /** Why the sandbox refused this request. */
+  blockedReason?: string;
 }
 export interface DownloadObservation {
   filename: string;
@@ -87,6 +91,8 @@ export interface SandboxResult {
   message?: string;
   durationMs?: number;
   terminationReason?: string;
+  /** Destination the sandbox policy refused, when navigation was blocked. */
+  blockedUrl?: string;
   limitsReached?: string[];
 }
 export interface RiskAssessment {

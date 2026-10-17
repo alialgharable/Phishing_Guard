@@ -5,6 +5,7 @@ import { chromium, type Browser, type BrowserContext, type Page, type Request as
 import type { SandboxConfig } from "./config.js";
 import { chromiumLaunchArgs } from "./diagnostics.js";
 import { canonicalHost, hostsDiffer, validateDestination, type Resolver } from "./network-policy.js";
+import { classifyNavigationFailure, createRequestGate, type PolicyBlock } from "./request-gate.js";
 import type { AnalyzeRequest, DownloadObservation, EvidenceItem, NetworkRequestObservation, RedirectObservation, SandboxResult } from "./types.js";
 
 export interface IsolationBackend {
@@ -110,8 +111,11 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
     let status: SandboxResult["status"] = "available";
     let finalHttpStatus: number | undefined;
     let terminationReason = "completed";
-    let blockedReason: string | undefined;
-    let requestCount = 0;
+    // `policyMessage`/`blockedUrl` describe why navigation itself was refused. They
+    // are deliberately separate from subresource blocks: a tracker image being
+    // blocked must not put a sentence in the message of a scan that completed.
+    let policyMessage: string | undefined;
+    let blockedUrl: string | undefined;
     const tempDir = await fs.mkdtemp(path.join("/tmp", "phishguard-scan-"));
 
     const finish = (overrides: Partial<SandboxResult> = {}): SandboxResult => ({
@@ -127,7 +131,8 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
       durationMs: Date.now() - started,
       terminationReason,
       limitsReached: [...limitsReached],
-      ...(blockedReason ? { message: blockedReason } : {}),
+      ...(policyMessage ? { message: policyMessage } : {}),
+      ...(blockedUrl ? { blockedUrl } : {}),
       ...overrides,
     });
 
@@ -145,12 +150,34 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
           "The submitted URL embedded user information. It was not sent to the destination host.",
         ));
       }
+      // One decision point for every request the browser makes, including the hops it
+      // follows on its own after a 3xx response. The route handler below enforces it;
+      // the recorded decisions are what let a refused navigation report as `blocked`
+      // rather than as an opaque Chromium network error.
+      const gate = createRequestGate({
+        ...(this.resolver ? { resolver: this.resolver } : {}),
+        extraBlockedCidrs: this.config.extraBlockedCidrs,
+        allowedProtocols: this.config.allowedProtocols,
+        maxRequests: this.config.maxRequests,
+        maxRedirects: this.config.maxRedirects,
+        onAllowed: (hostname) => contactedDomains.add(hostname),
+      });
+      const requestKey = (method: string, url: string) => `${method} ${url}`;
+      const blockedRequestKeys = new Map<string, PolicyBlock>();
+
       const validation = await validateDestination(target, this.validationOptions());
       if (!validation.allowed) {
         status = "blocked";
         terminationReason = "destination_blocked";
-        blockedReason = validation.reason ?? "destination blocked by policy";
-        behaviorObservations.push(evidence("sandbox_destination_blocked", "context", "Sandbox blocked destination", blockedReason));
+        policyMessage = validation.reason ?? "destination blocked by policy";
+        blockedUrl = target.href;
+        behaviorObservations.push(evidence(
+          "sandbox_destination_blocked",
+          "context",
+          "Sandbox blocked destination",
+          `${target.href} was refused before navigation: ${policyMessage}`,
+          [{ blockedUrl: target.href, reason: policyMessage, responded: false }],
+        ));
         return finish();
       }
       contactedDomains.add(validation.hostname);
@@ -176,34 +203,56 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
         context.setDefaultTimeout(this.config.navigationTimeoutMs);
         context.setDefaultNavigationTimeout(this.config.navigationTimeoutMs);
         await context.route("**/*", async (route, request) => {
-          requestCount += 1;
-          if (requestCount > this.config.maxRequests) {
-            limitsReached.add("max_requests");
-            await route.abort("blockedbyclient");
+          // Every resource type is judged by the same policy, so a redirect cannot reach a
+          // prohibited host through a subresource, a fetch, or a nested navigation.
+          const decision = await gate
+            .inspect({
+              url: request.url(),
+              method: request.method(),
+              resourceType: request.resourceType(),
+              isMainFrame: request.frame() === page?.mainFrame(),
+            })
+            .catch(() => undefined);
+
+          if (decision?.action === "continue") {
+            await route.continue().catch(() => undefined);
             return;
           }
-          let requestUrl: URL;
-          try {
-            requestUrl = new URL(request.url());
-          } catch {
-            await route.abort("blockedbyclient");
-            return;
-          }
-          const destination = await validateDestination(requestUrl, this.validationOptions());
-          if (!destination.allowed) {
-            blockedReason = destination.reason ?? "destination blocked by policy";
+
+          // Fail closed: a request whose policy outcome could not be established is not a
+          // request that was proven allowed, and the browser must not guess on our behalf.
+          if (!decision) {
             behaviorObservations.push(evidence(
               "sandbox_request_blocked",
               "context",
-              "Sandbox blocked a network request",
-              `${request.method()} ${request.url()} blocked: ${blockedReason}`,
-              [{ url: request.url(), method: request.method(), reason: blockedReason }],
+              "Sandbox refused a request it could not evaluate",
+              `${request.method()} ${request.url()} could not be evaluated against the destination policy and was not sent.`,
+              [{ url: request.url(), method: request.method(), reason: "policy evaluation failed", responded: false }],
             ));
-            await route.abort("blockedbyclient");
+            await route.abort("blockedbyclient").catch(() => undefined);
             return;
           }
-          contactedDomains.add(destination.hostname);
-          await route.continue();
+
+          const block = decision.block;
+          if (block.cause === "request_limit") limitsReached.add("max_requests");
+          if (block.cause === "redirect_limit") limitsReached.add("max_redirects");
+          blockedRequestKeys.set(requestKey(request.method(), request.url()), block);
+          // The request observer usually records first; patch it so an attempted, refused
+          // request can never be read as one that received a response.
+          const observed = [...networkRequests].reverse().find((item) => item.url === request.url() && item.method === request.method());
+          if (observed) {
+            observed.outcome = "attempted";
+            observed.blockedReason = block.reason;
+          }
+          const isNavigation = block.resourceType === "document" && block.isMainFrame;
+          behaviorObservations.push(evidence(
+            "sandbox_request_blocked",
+            isNavigation ? "medium" : "context",
+            isNavigation ? "Sandbox blocked a navigation request" : "Sandbox blocked a network request",
+            `${block.method} ${block.url} blocked before it left the browser: ${block.reason}`,
+            [{ url: block.url, method: block.method, resourceType: block.resourceType, reason: block.reason, viaRedirect: block.viaRedirect, responded: false }],
+          ));
+          await route.abort("blockedbyclient").catch(() => undefined);
         });
 
         page = await context.newPage();
@@ -215,12 +264,18 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
         page.on("request", (request) => {
           const initiator = requestInitiator(request);
           const domain = domainFromUrl(request.url());
+          const block = blockedRequestKeys.get(requestKey(request.method(), request.url()));
           networkRequests.push({
             method: request.method(),
             url: request.url(),
             ...(domain ? { domain } : {}),
             resourceType: request.resourceType(),
             ...(initiator ? { initiator } : {}),
+            // Requests are logged as attempts. `outcome` only becomes "responded" if a
+            // response actually arrived, which keeps blocked and failed requests from
+            // looking like observed traffic.
+            outcome: "attempted",
+            ...(block ? { blockedReason: block.reason } : {}),
           });
         });
         page.on("response", (response: PlaywrightResponse) => {
@@ -229,6 +284,8 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
           const existing = [...networkRequests].reverse().find((item) => item.url === request.url() && item.method === request.method());
           if (existing) {
             existing.status = response.status();
+            existing.outcome = "responded";
+            delete existing.blockedReason;
             const contentType = headers["content-type"];
             const contentLength = headerNumber(headers, "content-length");
             if (contentType) existing.contentType = contentType;
@@ -250,6 +307,24 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
             const redirect = { url: response.url(), status: response.status(), ...(headers.location ? { location: headers.location } : {}) };
             redirects.push(redirect);
             behaviorObservations.push(evidence("sandbox_redirect", "context", "Redirect observed", `${response.status()} redirect from ${response.url()}${headers.location ? ` to ${headers.location}` : ""}`, [redirect]));
+            if (request.frame() === page?.mainFrame()) {
+              // Evaluate the hop the browser is about to follow while the redirect is
+              // still in hand. Enforcement stays in the route handler; this records the
+              // policy reason for the refused target instead of inferring it later.
+              void gate
+                .inspectRedirect(response.url(), response.status(), headers["location"])
+                .then((block) => {
+                  if (!block) return;
+                  behaviorObservations.push(evidence(
+                    "sandbox_redirect_blocked",
+                    "medium",
+                    "Redirect target blocked by sandbox policy",
+                    `${redirect.status} redirect from ${redirect.url} targets ${block.url}, which the sandbox refused: ${block.reason}`,
+                    [{ blockedUrl: block.url, reason: block.reason, fromUrl: redirect.url, viaRedirect: true, responded: false }],
+                  ));
+                })
+                .catch(() => undefined);
+            }
             if (redirects.length > this.config.maxRedirects) {
               limitsReached.add("max_redirects");
               void page?.close().catch(() => undefined);
@@ -291,15 +366,62 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
           finalHttpStatus = mainResponse?.status();
           await page.waitForLoadState("networkidle", { timeout: Math.min(5_000, this.config.navigationTimeoutMs) }).catch(() => undefined);
         } catch (error) {
-          if (limitsReached.has("max_redirects")) throw new LimitReachedError("max_redirects", "redirect limit exceeded");
-          throw error;
+          // `page.goto()` rejects with net::ERR_BLOCKED_BY_CLIENT when the route gate
+          // aborted the document request. Classify from the recorded decision so a
+          // policy block is not reported as a generic navigation error, while genuine
+          // failures (refused connection, DNS failure, timeout) stay `error`.
+          const outcome = classifyNavigationFailure({ error, documentBlocks: gate.documentBlocks, limitsReached });
+          if (outcome.kind === "blocked") {
+            status = "blocked";
+            terminationReason = outcome.terminationReason;
+            policyMessage = outcome.message;
+            blockedUrl = outcome.block.url;
+            behaviorObservations.push(evidence(
+              "sandbox_navigation_blocked",
+              "medium",
+              outcome.block.viaRedirect ? "Redirect blocked by sandbox policy" : "Navigation blocked by sandbox policy",
+              outcome.message,
+              [{
+                blockedUrl: outcome.block.url,
+                initialUrl: target.href,
+                reason: outcome.block.reason,
+                viaRedirect: outcome.block.viaRedirect,
+                browserError: error instanceof Error ? error.message : String(error),
+                responded: false,
+              }],
+            ));
+            await Promise.allSettled(downloadTasks);
+            return;
+          }
+          if (outcome.kind === "limit") throw new LimitReachedError(outcome.terminationReason, outcome.message);
+          // A genuine failure - refused connection, DNS failure, TLS failure, timeout -
+          // stays `error` with Chromium's own message. It is uncertainty about the scan,
+          // never a verdict about the URL, and it is never relabelled as a block.
+          status = "error";
+          terminationReason = outcome.terminationReason;
+          policyMessage = outcome.message;
+          await Promise.allSettled(downloadTasks);
+          return;
         }
         finalUrl = page.url();
         const finalValidation = await validateDestination(new URL(finalUrl), this.validationOptions());
         if (!finalValidation.allowed) {
+          // Reached only if the engine completed a navigation the policy refused, which
+          // should not happen while the route gate is armed. Report it as a block with
+          // its reason rather than letting an unexpected engine path look like a
+          // successful scan.
           status = "blocked";
           terminationReason = "final_destination_blocked";
-          blockedReason = finalValidation.reason ?? "final destination blocked by policy";
+          policyMessage = finalValidation.reason ?? "final destination blocked by policy";
+          blockedUrl = finalUrl;
+          behaviorObservations.push(evidence(
+            "sandbox_navigation_blocked",
+            "medium",
+            "Navigation reached a blocked destination",
+            `${finalUrl} was reached despite the request policy: ${policyMessage}`,
+            [{ blockedUrl: finalUrl, reason: policyMessage, initialUrl: target.href }],
+          ));
+          await Promise.allSettled(downloadTasks);
           return;
         }
         await Promise.allSettled(downloadTasks);
@@ -381,12 +503,14 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
       if (error instanceof LimitReachedError) {
         limitsReached.add(error.limit);
         status = error.limit.includes("timeout") ? "timeout" : "blocked";
-        terminationReason = error.message;
-        blockedReason = error.message;
+        // The limit name in `terminationReason`, the sentence in `message`: a limit is
+        // an operational outcome with an explanation, not a verdict about the URL.
+        terminationReason = error.limit;
+        policyMessage = error.message;
       } else {
         status = "error";
-        terminationReason = "error";
-        blockedReason = error instanceof Error ? error.message : "sandbox analysis failed";
+        terminationReason = "sandbox_failure";
+        policyMessage = error instanceof Error ? error.message : "sandbox analysis failed";
       }
     } finally {
       await page?.close().catch(() => undefined);
@@ -396,7 +520,7 @@ export class PlaywrightIsolationBackend implements IsolationBackend {
     }
 
     if (limitsReached.has("max_requests") && status === "available") {
-      terminationReason = "request limit reached";
+      terminationReason = "max_requests";
     }
     return finish();
   }
