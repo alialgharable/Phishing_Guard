@@ -7,8 +7,8 @@ ENV HOST=0.0.0.0 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     SANDBOX_ARTIFACT_DIR=/tmp/phishguard-sandbox-artifacts
 
-COPY package.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY tsconfig.json ./
 COPY src ./src
