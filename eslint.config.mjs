@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // vintage-magic is a separate Next project with its own tsconfig, eslint config and
+    // vitest config, so the root tooling must not sweep it up.
+    "vintage-magic/**",
   ]),
 ]);
 

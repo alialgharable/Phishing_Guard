@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+# Local runtime data for the file-backed store. The seed lives in
+# src/lib/data/sample-products.ts; this file is the mutable copy the server writes to.
+data/db.json
+# Images uploaded from /admin while Supabase Storage is not configured.
+public/media/uploads/
+.env
+.env.local
+# The documented template is part of the project, not a secret.
+!.env.example

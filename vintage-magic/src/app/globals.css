@@ -1,0 +1,684 @@
+@import "tailwindcss";
+
+/*
+  Vintage Magic Beirut — design system.
+
+  The identity is carried by geometry, scale and overlap rather than by colour: the whole
+  palette collapses to a readable grayscale image, and every decorative form (arch, ellipse,
+  ticket, seal, hatch, thread) is defined once here so sections inherit the same vocabulary.
+*/
+
+@theme {
+  /* Archival paper and ink. Accent colours are used as small quantities, never as surfaces. */
+  --color-ivory: #f1efe9;
+  --color-chalk: #fbfaf6;
+  --color-parchment: #e6e2d7;
+  --color-ink: #1e1d1a;
+  --color-espresso: #49362e;
+  --color-burgundy: #713b43;
+  --color-olive: #77765c;
+  --color-rule: #cdc8ba;
+  --color-rule-strong: #a9a294;
+  --color-shadow: rgba(30, 29, 26, 0.09);
+
+  --font-editorial: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-label: "Barlow Condensed", "Arial Narrow", Helvetica, sans-serif;
+  --font-ui: "Archivo Variable", "Archivo", Helvetica, Arial, sans-serif;
+  --font-hand: "Caveat", "Segoe Script", cursive;
+
+  --gutter: clamp(18px, 4.2vw, 74px);
+  --hair: 1px;
+
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-slow: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--color-ivory);
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-ivory);
+    color: var(--color-ink);
+    font-family: var(--font-ui);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+
+  /* The page is a printed sheet: a warm, slightly uneven ground with a fixed grain plate on top. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(58rem 34rem at 82% -6%, rgba(119, 118, 92, 0.16), transparent 62%),
+      radial-gradient(44rem 30rem at 4% 42%, rgba(113, 59, 67, 0.09), transparent 60%),
+      radial-gradient(40rem 26rem at 70% 104%, rgba(73, 54, 46, 0.1), transparent 60%);
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.32;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.28'/%3E%3C/svg%3E");
+  }
+
+  ::selection {
+    background: var(--color-burgundy);
+    color: var(--color-chalk);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  ul,
+  ol {
+    margin: 0;
+  }
+
+  ul,
+  ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  /* ---------- layout ---------- */
+  .shell {
+    width: 100%;
+    max-width: 1580px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    position: relative;
+  }
+
+  .shell-narrow {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .section {
+    position: relative;
+    padding-block: clamp(64px, 9vw, 148px);
+  }
+
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 28px);
+  }
+
+  /* A single hairline column that visually ties stacked sections into one spread. */
+  .thread {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: calc(var(--gutter) / 2);
+    width: var(--hair);
+    background: linear-gradient(to bottom, transparent, var(--color-rule) 12%, var(--color-rule) 88%, transparent);
+    pointer-events: none;
+  }
+
+  @media (min-width: 900px) {
+    .thread {
+      inset-inline-start: 28px;
+    }
+  }
+
+  /* ---------- type ---------- */
+  .display {
+    font-family: var(--font-editorial);
+    font-weight: 400;
+    font-size: clamp(3.4rem, 13.5vw, 12.5rem);
+    line-height: 0.82;
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+
+  .display-tight {
+    line-height: 0.78;
+    letter-spacing: -0.04em;
+  }
+
+  .statement {
+    font-family: var(--font-editorial);
+    font-size: clamp(2rem, 5.6vw, 5.2rem);
+    line-height: 0.94;
+    letter-spacing: -0.02em;
+  }
+
+  .statement--outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--color-ink);
+  }
+
+  .prose-editorial {
+    font-size: clamp(1.02rem, 1.15vw, 1.22rem);
+    line-height: 1.62;
+    max-width: 62ch;
+    color: color-mix(in srgb, var(--color-ink) 82%, var(--color-espresso));
+  }
+
+  .label {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.7rem;
+    line-height: 1.1;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+  }
+
+  .label-light {
+    font-weight: 400;
+    letter-spacing: 0.14em;
+  }
+
+  .label-lg {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: clamp(0.82rem, 1vw, 1rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .muted {
+    color: color-mix(in srgb, var(--color-ink) 55%, var(--color-ivory));
+  }
+
+  .numeral {
+    font-family: var(--font-editorial);
+    font-size: clamp(3.2rem, 9vw, 8.4rem);
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .numeral--outline {
+    color: transparent;
+    -webkit-text-stroke: 1px color-mix(in srgb, var(--color-ink) 45%, transparent);
+  }
+
+  .hand {
+    font-family: var(--font-hand);
+    font-size: 1.06rem;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    color: var(--color-espresso);
+  }
+
+  /* ---------- graphic vocabulary ---------- */
+  .rule-hair {
+    height: var(--hair);
+    background: var(--color-rule);
+    border: 0;
+    margin: 0;
+  }
+
+  .rule-stack {
+    display: grid;
+    gap: 3px;
+  }
+
+  .rule-stack span {
+    display: block;
+    height: var(--hair);
+    background: var(--color-rule);
+  }
+
+  .rule-stack span:nth-child(2) {
+    opacity: 0.55;
+  }
+
+  .rule-stack span:nth-child(3) {
+    opacity: 0.3;
+  }
+
+  .arch {
+    border-radius: 999px 999px 6px 6px;
+    overflow: hidden;
+  }
+
+  .arch-clip {
+    clip-path: shape(from 0% 100%, line to 0% 46%, arc to 100% 46% of 120% cw, line to 100% 100%, close);
+  }
+
+  .arch-outline {
+    border: var(--hair) solid var(--color-ink);
+    border-radius: 999px 999px 6px 6px;
+  }
+
+  .ellipse-frame {
+    border: var(--hair) solid color-mix(in srgb, var(--color-ink) 40%, transparent);
+    border-radius: 50%;
+  }
+
+  .blob {
+    border-radius: 62% 38% 46% 54% / 56% 44% 56% 44%;
+  }
+
+  .disc-fill {
+    background: color-mix(in srgb, var(--color-olive) 22%, var(--color-ivory));
+  }
+
+  .disc-espresso {
+    background: var(--color-espresso);
+  }
+
+  .hatch {
+    background-image: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--color-ink) 22%, transparent) 0 1px, transparent 1px 7px);
+  }
+
+  .dot-field {
+    background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 34%, transparent) 0.8px, transparent 0.9px);
+    background-size: 9px 9px;
+  }
+
+  .grid-paper {
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--color-ink) 6%, transparent) var(--hair), transparent var(--hair)),
+      linear-gradient(to bottom, color-mix(in srgb, var(--color-ink) 6%, transparent) var(--hair), transparent var(--hair));
+    background-size: 28px 28px;
+  }
+
+  /* Photographs of garments are shot on paper white; multiply drops them onto the page ground
+     so the garment overlaps type and rules instead of sitting in a box. */
+  .photo-multiply {
+    mix-blend-mode: multiply;
+  }
+
+  .photo-plate {
+    background: linear-gradient(157deg, var(--color-chalk), var(--color-parchment));
+    box-shadow: 0 24px 60px -44px var(--color-shadow), inset 0 0 0 var(--hair) color-mix(in srgb, var(--color-ink) 8%, transparent);
+  }
+
+  .edge-tag {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.28em;
+  }
+
+  /* ---------- ticket labels ---------- */
+  .ticket {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.34rem 0.72rem;
+    background: var(--color-chalk);
+    border: var(--hair) solid color-mix(in srgb, var(--color-ink) 32%, transparent);
+    border-radius: 2px;
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.66rem;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  /* Perforated ends, like a torn-off archive stub. */
+  .ticket::before,
+  .ticket::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    width: 4px;
+    background-image: radial-gradient(circle at 50% 50%, var(--color-ivory) 1.6px, transparent 1.7px);
+    background-size: 4px 6px;
+    background-repeat: repeat-y;
+  }
+
+  .ticket::before {
+    inset-inline-start: -1px;
+  }
+
+  .ticket::after {
+    inset-inline-end: -1px;
+  }
+
+  .ticket--collected {
+    background: var(--color-ink);
+    color: var(--color-chalk);
+    border-color: var(--color-ink);
+  }
+
+  .ticket--one {
+    background: var(--color-burgundy);
+    color: var(--color-chalk);
+    border-color: var(--color-burgundy);
+  }
+
+  .ticket--plate {
+    background: transparent;
+    border-style: dashed;
+    color: var(--color-espresso);
+  }
+
+  /* ---------- interactive type ---------- */
+  .link-sweep {
+    position: relative;
+    display: inline-block;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% var(--hair);
+    transition: background-size 0.45s var(--ease-editorial);
+  }
+
+  .link-sweep:hover,
+  .link-sweep:focus-visible {
+    background-size: 100% var(--hair);
+  }
+
+  .btn {
+    --btn-bg: var(--color-ink);
+    --btn-fg: var(--color-chalk);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.92rem 1.5rem;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: var(--hair) solid var(--btn-bg);
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition:
+      transform 0.4s var(--ease-editorial),
+      box-shadow 0.4s var(--ease-editorial);
+  }
+
+  .btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-burgundy);
+    transform: translateY(101%);
+    transition: transform 0.48s var(--ease-editorial);
+    z-index: 0;
+  }
+
+  .btn:hover::after,
+  .btn:focus-visible::after {
+    transform: translateY(0);
+  }
+
+  .btn > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px -22px var(--color-ink);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .btn--ghost {
+    --btn-bg: transparent;
+    --btn-fg: var(--color-ink);
+    border-color: color-mix(in srgb, var(--color-ink) 40%, transparent);
+  }
+
+  .field {
+    width: 100%;
+    padding: 0.78rem 0.15rem 0.6rem;
+    background: transparent;
+    border: 0;
+    border-bottom: var(--hair) solid color-mix(in srgb, var(--color-ink) 34%, transparent);
+    font-family: var(--font-ui);
+    font-size: 1rem;
+    transition:
+      border-color 0.3s ease,
+      background-color 0.3s ease;
+  }
+
+  .field::placeholder {
+    color: color-mix(in srgb, var(--color-ink) 38%, transparent);
+  }
+
+  .field:focus {
+    outline: none;
+    border-bottom-color: var(--color-ink);
+    background: linear-gradient(to bottom, transparent 60%, color-mix(in srgb, var(--color-olive) 12%, transparent));
+  }
+
+  .field[aria-invalid="true"] {
+    border-bottom-color: var(--color-burgundy);
+  }
+
+  .field-label {
+    font-family: var(--font-label);
+    font-weight: 600;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-ink) 62%, transparent);
+  }
+
+  .card-surface {
+    position: relative;
+    background: color-mix(in srgb, var(--color-chalk) 78%, transparent);
+    border: var(--hair) solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+    transition:
+      border-color 0.4s ease,
+      background-color 0.4s ease;
+  }
+
+  .card-surface:hover {
+    border-color: color-mix(in srgb, var(--color-ink) 34%, transparent);
+    background: var(--color-chalk);
+  }
+}
+
+@layer utilities {
+  .anim-seal {
+    animation: seal-rotate 28s linear infinite;
+    transform-origin: 50% 50%;
+  }
+
+  .anim-seal--slow {
+    animation-duration: 52s;
+    animation-direction: reverse;
+  }
+
+  .group:hover .anim-seal,
+  .group:focus-visible .anim-seal {
+    animation-duration: 9s;
+  }
+
+  .anim-float,
+  .garment-bob {
+    animation: garment-float 9s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  /* The slow drift that makes the plate feel like a suspended garment, on its own element so it
+     never competes with the entrance transform or the pointer parallax. */
+  .garment-bob {
+    animation-duration: 11s;
+  }
+
+  @keyframes seal-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes garment-float {
+    from {
+      transform: translate3d(0, -0.9rem, 0) rotate(-0.7deg);
+    }
+    to {
+      transform: translate3d(0, 0.9rem, 0) rotate(0.7deg);
+    }
+  }
+
+  /* Line-mask reveal: each headline row is a clipped strip that slides up into its own box.
+     Two flavours so CSS and GSAP never write the same property on the same element:
+     `--css` is staggered with transitions, `--js` is left alone for a timeline to drive. */
+  .mask-line {
+    display: block;
+    overflow: hidden;
+  }
+
+  .mask-line > span {
+    display: block;
+  }
+
+  .mask-line--css > span,
+  .mask-line--js > span {
+    transform: translate3d(0, 105%, 0);
+    opacity: 0;
+  }
+
+  .mask-line--css > span {
+    transition:
+      transform 1.05s var(--ease-editorial) var(--line-delay, 0ms),
+      opacity 0.7s ease var(--line-delay, 0ms);
+  }
+
+  .is-ready .mask-line--css > span,
+  .is-ready .mask-line--js > span {
+    transform: none;
+    opacity: 1;
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition:
+      opacity 0.8s ease,
+      transform 0.9s var(--ease-editorial);
+  }
+
+  .is-ready .fade-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Anything animated through data-scroll stays visible if JS never runs. */
+  html.no-js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    transform: translateY(-140%);
+    z-index: 90;
+    background: var(--color-ink);
+    color: var(--color-chalk);
+    padding: 0.7rem 1rem;
+    font-family: var(--font-label);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+  }
+
+  .skip-link:focus-visible {
+    transform: translateY(0.6rem);
+  }
+}
+
+/* Reduced motion: everything that moves without being asked to, stops. Reveals resolve to
+   their final state immediately so no content depends on an animation to appear. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .anim-seal,
+  .anim-seal--slow,
+  .anim-float {
+    animation: none !important;
+  }
+
+  .mask-line > span,
+  .fade-in,
+  .garment-bob {
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,597 @@
+/*
+  Editorial kit: the reusable motion and component behaviours that the graphic vocabulary needs
+  on top of the tokens in globals.css. Everything here degrades to a static, readable layout -
+  no rule in this file is required to see content, only to animate it.
+*/
+
+/* ---------- scroll reveals ---------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity 0.9s var(--ease-editorial, ease) var(--reveal-delay, 0ms),
+    transform 1s var(--ease-editorial, cubic-bezier(0.16, 1, 0.3, 1)) var(--reveal-delay, 0ms),
+    clip-path 1.1s var(--ease-editorial, cubic-bezier(0.16, 1, 0.3, 1)) var(--reveal-delay, 0ms);
+  will-change: transform, opacity;
+}
+
+[data-reveal="side"] {
+  transform: translate3d(var(--reveal-x, -34px), 0, 0);
+}
+
+[data-reveal="scale"] {
+  transform: scale(0.9);
+}
+
+/* Images "expand into their final shape": the frame opens from a narrow slit. */
+[data-reveal="open"] {
+  clip-path: inset(12% 44% 12% 44% round 999px);
+  transform: translate3d(0, 18px, 0) scale(1.04);
+  opacity: 0.001;
+}
+
+[data-reveal="rule"] {
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 1;
+}
+
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0% 0% 0% 0% round 0px);
+}
+
+[data-reveal="rule"].is-visible {
+  transform: scaleX(1);
+}
+
+/* Strokes inside a revealed block draw themselves once, using the browser's own path length. */
+[data-reveal] [data-draw] path,
+[data-reveal] [data-draw] line,
+[data-draw].is-visible path,
+[data-draw].is-visible line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.6s cubic-bezier(0.6, 0.05, 0.2, 1) var(--draw-delay, 220ms);
+}
+
+[data-reveal].is-visible [data-draw] path,
+[data-reveal].is-visible [data-draw] line,
+[data-draw].is-visible path,
+[data-draw].is-visible line {
+  stroke-dashoffset: 0;
+}
+
+/* ---------- floating garment + pointer parallax ---------- */
+.garment-stage {
+  position: relative;
+  transform-style: preserve-3d;
+}
+
+.garment-float {
+  animation: garment-float 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.garment-parallax {
+  transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* ---------- hero composition ---------- */
+.hero-headline .mask-line > span {
+  transition-delay: var(--line-delay, 0ms);
+}
+
+.hero-plate {
+  opacity: 0;
+  transform: translate3d(var(--plate-x, 6%), var(--plate-y, 9%), 0) rotate(var(--plate-rot, -7deg)) scale(1.03);
+  transition:
+    opacity 1s ease 0.25s,
+    transform 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.is-ready .hero-plate {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+}
+
+.hero-chip {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--chip-delay, 900ms);
+}
+
+.is-ready .hero-chip {
+  opacity: 1;
+  transform: none;
+}
+
+.hero-disc {
+  opacity: 0;
+  transform: scale(0.72);
+  transition:
+    opacity 1.1s ease 0.1s,
+    transform 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+}
+
+.is-ready .hero-disc {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero-contour path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 2.4s cubic-bezier(0.55, 0.06, 0.2, 1) 0.6s;
+}
+
+.is-ready .hero-contour path {
+  stroke-dashoffset: 0;
+}
+
+/* The seal's own ring carries .anim-seal; the hero only reveals it, and hovering the group
+   shortens the cadence through the shared .group:hover rule in globals.css. */
+.hero-seal .seal__ring {
+  animation-play-state: paused;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-seal:hover .seal__ring,
+  .hero-seal:focus-within .seal__ring {
+    animation-play-state: running;
+  }
+}
+
+/* ---------- product cards ---------- */
+.piece {
+  position: relative;
+  display: block;
+  isolation: isolate;
+}
+
+.piece__media {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(158deg, var(--color-chalk), var(--color-parchment));
+}
+
+.piece__img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  transform: scale(1.001);
+  transition: transform 1.05s var(--ease-editorial), opacity 0.55s ease;
+}
+
+.piece__img--alt {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+}
+
+.piece__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border: 1px solid transparent;
+  transition:
+    border-color 0.5s ease,
+    border-radius 0.7s var(--ease-editorial),
+    background-color 0.5s ease;
+}
+
+.piece__arrow {
+  position: absolute;
+  z-index: 4;
+  inset-block-end: 0.9rem;
+  inset-inline-end: 0.9rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-chalk);
+  opacity: 0;
+  transform: translate3d(0, 10px, 0) scale(0.85);
+  transition:
+    opacity 0.4s ease,
+    transform 0.6s var(--ease-editorial);
+}
+
+.piece__arrow svg {
+  transition: transform 0.6s var(--ease-editorial);
+}
+
+.piece__meta {
+  transition: transform 0.6s var(--ease-editorial);
+}
+
+.piece__ticket {
+  opacity: 0;
+  transform: translate3d(-6px, 6px, 0) rotate(-3deg);
+  transition:
+    opacity 0.4s ease,
+    transform 0.55s var(--ease-editorial);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .piece:hover .piece__img,
+  .piece:focus-visible .piece__img {
+    transform: scale(1.055);
+  }
+
+  .piece:hover .piece__img--alt,
+  .piece:focus-visible .piece__img--alt {
+    opacity: 1;
+  }
+
+  .piece:hover .piece__frame,
+  .piece:focus-visible .piece__frame {
+    border-color: color-mix(in srgb, var(--color-ink) 45%, transparent);
+    border-radius: 999px 999px 4px 4px;
+    background: color-mix(in srgb, var(--color-olive) 8%, transparent);
+  }
+
+  .piece:hover .piece__arrow,
+  .piece:focus-visible .piece__arrow {
+    opacity: 1;
+    transform: none;
+  }
+
+  .piece:hover .piece__arrow svg,
+  .piece:focus-visible .piece__arrow svg {
+    transform: rotate(45deg);
+  }
+
+  .piece:hover .piece__meta,
+  .piece:focus-visible .piece__meta {
+    transform: translate3d(0, -3px, 0);
+  }
+
+  .piece:hover .piece__ticket,
+  .piece:focus-visible .piece__ticket,
+  .piece:focus-within .piece__ticket {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+}
+
+/* Touch devices have no hover, so the archival ticket and the affordance are simply shown. */
+@media (hover: none) {
+  .piece__arrow {
+    opacity: 1;
+    transform: none;
+  }
+
+  .piece__ticket {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-3deg);
+  }
+}
+
+.piece[data-collected="true"] .piece__img {
+  filter: grayscale(0.72) contrast(0.95);
+  opacity: 0.9;
+}
+
+.piece[data-collected="true"] .piece__img--alt {
+  display: none;
+}
+
+/* ---------- archive grid motion ---------- */
+.piece-grid {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 44px) clamp(14px, 2vw, 30px);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+}
+
+/* ---------- detail gallery ---------- */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gallery__stage {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-chalk), var(--color-parchment));
+  touch-action: pan-y;
+  cursor: zoom-in;
+}
+
+.gallery__stage[data-magnify="true"] {
+  cursor: zoom-out;
+}
+
+.gallery__stage img {
+  transition: transform 0.4s var(--ease-editorial);
+}
+
+.gallery__hud {
+  display: flex;
+}
+
+.gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
+
+.gallery__thumb {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+  background: var(--color-chalk);
+  transition:
+    border-color 0.35s ease,
+    transform 0.5s var(--ease-editorial);
+}
+
+.gallery__thumb[aria-current="true"] {
+  border-color: var(--color-ink);
+  transform: translateY(-2px);
+}
+
+.gallery__thumb:hover {
+  border-color: color-mix(in srgb, var(--color-ink) 55%, transparent);
+}
+
+/* ---------- annotations pinned to a garment ----------
+   Notes sit outside the silhouette on a hairline leader, so a note can never cover the piece it
+   describes; they are text in the document (not tooltips) and can be switched off entirely. */
+.annotation-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.annotation {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  transform: translate3d(-50%, -50%, 0);
+  pointer-events: auto;
+}
+
+.annotation__dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--color-burgundy);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-burgundy) 18%, transparent);
+}
+
+/* The leader draws itself once the layer is mounted, using the same pathLength=1 trick as the hero contour. */
+.annotation__leader {
+  width: 0;
+  height: 1px;
+  color: color-mix(in srgb, var(--color-ink) 45%, transparent);
+  transition: width 0.7s var(--ease-editorial) 0.15s;
+}
+
+.annotation__leader line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.7s var(--ease-editorial) 0.05s;
+}
+
+.annotation-layer .annotation__leader {
+  width: clamp(26px, 4vw, 64px);
+}
+
+.annotation-layer .annotation__leader line {
+  stroke-dashoffset: 0;
+}
+
+.annotation__body {
+  max-width: 13rem;
+  padding: 2px 6px;
+  background: color-mix(in srgb, var(--color-ivory) 88%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.4s ease 0.3s,
+    transform 0.5s var(--ease-editorial) 0.3s;
+}
+
+.annotation-layer .annotation__body {
+  opacity: 1;
+  transform: none;
+}
+
+/* Left-pointing notes hang to the left of their dot, right-pointing to the right. */
+.annotation--left {
+  flex-direction: row-reverse;
+}
+
+.annotation--left .annotation__body {
+  text-align: right;
+  transform: translateX(6px);
+}
+
+.annotation--left .annotation-layer .annotation__body,
+.annotation--left.annotation-layer .annotation__body {
+  transform: none;
+}
+
+/* ---------- navigation ---------- */
+.site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--color-ivory) 82%, transparent);
+  backdrop-filter: saturate(120%) blur(9px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    padding 0.4s var(--ease-editorial);
+}
+
+.site-header[data-compact="true"] {
+  background: color-mix(in srgb, var(--color-ivory) 96%, transparent);
+  border-bottom-color: var(--color-rule);
+}
+
+.nav-item {
+  position: relative;
+  padding: 0.35rem 0.1rem;
+}
+
+.nav-item__label {
+  position: relative;
+  z-index: 1;
+}
+
+.menu-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--color-ivory);
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.72s var(--ease-editorial);
+}
+
+.menu-panel[data-open="true"] {
+  clip-path: inset(0 0 0 0);
+}
+
+.menu-line {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease-editorial);
+}
+
+.menu-panel[data-open="true"] .menu-line {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 55ms + 120ms);
+}
+
+/* ---------- footer wordmark ---------- */
+.wordmark-mask span {
+  display: block;
+  transform: translate3d(0, 92%, 0);
+  transition: transform 1.15s var(--ease-editorial);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+.wordmark-mask.is-visible span {
+  transform: none;
+}
+
+/* ---------- page transitions ---------- */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-vt="piece"] {
+    view-transition-name: piece;
+  }
+
+  ::view-transition-old(piece),
+  ::view-transition-new(piece) {
+    animation-duration: 0.52s;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+/* ---------- bag drawer feedback ---------- */
+.bag-flash {
+  animation: bag-pop 0.5s var(--ease-editorial);
+}
+
+@keyframes bag-pop {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.24) rotate(-4deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.toast {
+  animation: toast-in 0.45s var(--ease-editorial);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0) scale(0.98);
+  }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal="side"],
+  [data-reveal="scale"],
+  [data-reveal="open"],
+  [data-reveal="rule"] {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+
+  [data-reveal] [data-draw] path,
+  [data-draw] path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    transition: none !important;
+  }
+
+  .garment-float,
+  .garment-bob,
+  .garment-parallax,
+  .hero-line > span,
+  .hero-plate,
+  .hero-chip,
+  .hero-disc,
+  .wordmark-mask span,
+  .menu-panel,
+  .menu-line {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+  }
+
+  .hero-contour path {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    transition: none;
+  }
+
+  .hero-seal .seal__ring {
+    animation: none !important;
+  }
+}
